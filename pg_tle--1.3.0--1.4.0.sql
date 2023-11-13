@@ -13,30 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "postgres.h"
 
-#include "tleextension.h"
-#include "passcheck.h"
-#include "clientauth.h"
-#include "fmgr.h"
-#include "shmem.h"
+-- complain if script is sourced in psql, rather than via CREATE EXTENSION
+\echo Use "CREATE EXTENSION pg_tle" to load this file. \quit
 
-PG_MODULE_MAGIC;
+CREATE FUNCTION pgtle.read_tle_shmem_val()
+RETURNS int
+SET search_path TO 'pgtle'
+STRICT
+AS 'MODULE_PATHNAME', 'read_tle_shmem_val'
+LANGUAGE C;
 
-void		_PG_init(void);
-void		_PG_fini(void);
-
-void
-_PG_init(void)
-{
-	pg_tle_init();
-	passcheck_init();
-	clientauth_init();
-	shmem_init();
-}
-
-void
-_PG_fini(void)
-{
-	pg_tle_fini();
-}
+CREATE FUNCTION pgtle.modify_tle_shmem_val(
+    data int
+)
+RETURNS void
+SET search_path TO 'pgtle'
+STRICT
+AS 'MODULE_PATHNAME', 'modify_tle_shmem_val'
+LANGUAGE C;

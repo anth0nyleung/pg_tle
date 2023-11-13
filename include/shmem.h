@@ -1,0 +1,1 @@
+void shmem_init();
