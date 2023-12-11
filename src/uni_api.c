@@ -18,6 +18,7 @@
 #include "tleextension.h"
 #include "passcheck.h"
 #include "clientauth.h"
+#include "bgw.h"
 #include "fmgr.h"
 
 PG_MODULE_MAGIC;
@@ -31,6 +32,7 @@ _PG_init(void)
 	pg_tle_init();
 	passcheck_init();
 	clientauth_init();
+	bgw_init();
 }
 
 void

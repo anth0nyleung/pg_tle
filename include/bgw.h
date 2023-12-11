@@ -1,0 +1,1 @@
+void bgw_init(void);
