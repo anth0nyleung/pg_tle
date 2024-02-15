@@ -164,7 +164,7 @@ static void
 passcheck_check_password_hook(const char *username, const char *shadow_pass, PasswordType password_type, Datum validuntil_time, bool validuntil_null)
 {
 	BackgroundWorker worker;
-	BackgroundWorkerHandle *worker_handle;
+	BackgroundWorkerHandle *worker_handle = NULL;
 	bool		error;
 	char		error_msg[PASSCHECK_ERROR_MSG_MAX_STRLEN];
 	char		error_hint[PASSCHECK_ERROR_MSG_MAX_STRLEN];
@@ -286,7 +286,7 @@ passcheck_check_password_hook(const char *username, const char *shadow_pass, Pas
 	 * 2. Spin up background worker.
 	 */
 	worker.bgw_flags = BGWORKER_SHMEM_ACCESS | BGWORKER_BACKEND_DATABASE_CONNECTION;
-	worker.bgw_start_time = BgWorkerStart_RecoveryFinished;
+	worker.bgw_start_time = BgWorkerStart_ConsistentState;
 	worker.bgw_restart_time = 1;
 	worker.bgw_notify_pid = MyProcPid;
 	sprintf(worker.bgw_library_name, PG_TLE_EXTNAME);
@@ -342,6 +342,12 @@ passcheck_check_password_hook(const char *username, const char *shadow_pass, Pas
 	error = passcheck_ss->error;
 	snprintf(error_msg, PASSCHECK_ERROR_MSG_MAX_STRLEN, "%s", passcheck_ss->error_msg);
 	snprintf(error_hint, PASSCHECK_ERROR_MSG_MAX_STRLEN, "%s", passcheck_ss->error_hint);
+
+	/* Erase data about this request from shared memory now that we're done */
+	memset(&passcheck_ss->data, 0, sizeof(PasswordCheckHookData));
+	passcheck_ss->error = false;
+	memset(passcheck_ss->error_msg, 0, sizeof(char) * PASSCHECK_ERROR_MSG_MAX_STRLEN);
+	memset(passcheck_ss->error_hint, 0, sizeof(char) * PASSCHECK_ERROR_MSG_MAX_STRLEN);
 
 	passcheck_ss->available_entry = true;
 	LWLockRelease(passcheck_ss->lock);
