@@ -5301,6 +5301,7 @@ is_pgtle_used_user_func(Oid funcid, bool *is_operator_func)
 	FuncCandidateList clist;
 	int			nargs;
 	int			i;
+	int			fgc_flags;
 
 	tuple = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcid));
 	if (!HeapTupleIsValid(tuple))
@@ -5342,7 +5343,7 @@ is_pgtle_used_user_func(Oid funcid, bool *is_operator_func)
 	}
 
 	funcNameList = list_make2(makeString(get_namespace_name(namespace)), makeString(proname));
-	clist = FUNCNAME_GET_CANDIDATES(funcNameList, nargs, NIL, false, false, false);
+	clist = FUNCNAME_GET_CANDIDATES(funcNameList, nargs, NIL, false, false, false, &fgc_flags);
 	for (; clist; clist = clist->next)
 	{
 		if (is_pgtle_defined_c_func(clist->oid, is_operator_func))

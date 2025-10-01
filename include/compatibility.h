@@ -382,7 +382,10 @@ CastCreate(Oid sourcetypeid, Oid targettypeid, Oid funcid, char castcontext,
 	CastCreate(sourcetypeid, targettypeid, funcid, castcontext, castmethod, behavior)
 #endif
 
-#if PG_VERSION_NUM >= 140000
+#if PG_VERSION_NUM >= 180000
+#define FUNCNAME_GET_CANDIDATES(names, nargs, argnames, expand_variadic, expand_defaults, missing_ok, fgc_flags) \
+  FuncnameGetCandidates(names, nargs, argnames, expand_variadic, expand_defaults, false /* include_out_arguments */, missing_ok, fgc_flags)
+#elif PG_VERSION_NUM >= 140000
 #define FUNCNAME_GET_CANDIDATES(names, nargs, argnames, expand_variadic, expand_defaults, missing_ok) \
 	FuncnameGetCandidates(names, nargs, argnames, expand_variadic, expand_defaults, false /* include_out_arguments */, missing_ok)
 #else
